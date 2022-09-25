@@ -51,4 +51,10 @@
     <string name="close">Close</string>
     <string name="track_on_map">Track on Map</string>
     <string name="order_name">Order Name</string>
+    <string name="logout">Logout</string>
+    <string name="edit_photo">Edit Photo</string>
+    <string name="username">Username</string>
+    <string name="name">Name</string>
+    <string name="photo">Photo</string>
+    <string name="save">Save</string>
 </resources>

@@ -17,6 +17,9 @@
         android:theme="@style/Theme.RotiKingDelivery"
         tools:targetApi="31">
         <activity
+            android:name=".MyPhotoActivity"
+            android:exported="false" />
+        <activity
             android:name=".OrderDetailActivity"
             android:exported="false" />
         <activity
