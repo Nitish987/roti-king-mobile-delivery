@@ -50,4 +50,5 @@
     <string name="take_the_code_from_the_customer_after_giving_the_food_package_to_the_customer">Take the code from the customer after giving the food package to the customer.</string>
     <string name="close">Close</string>
     <string name="track_on_map">Track on Map</string>
+    <string name="order_name">Order Name</string>
 </resources>

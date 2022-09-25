@@ -31,7 +31,7 @@ public class OrdersFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("orderState", 0).whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", true).orderBy("time", Query.Direction.ASCENDING);
+        query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("orderState", 1).whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", true).orderBy("time", Query.Direction.ASCENDING);
     }
 
     @Override
