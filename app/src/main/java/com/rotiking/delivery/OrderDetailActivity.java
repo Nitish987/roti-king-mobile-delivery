@@ -25,6 +25,7 @@ import com.rotiking.delivery.models.CheckoutCartItem;
 import com.rotiking.delivery.models.Order;
 import com.rotiking.delivery.models.Topping;
 import com.rotiking.delivery.utils.DateParser;
+import com.rotiking.delivery.utils.Promise;
 import com.rotiking.delivery.utils.Validator;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class OrderDetailActivity extends AppCompatActivity {
     private LinearLayout deliveryCodeDesk;
     private EditText deliveryCode_eTxt;
 
-    private String orderId;
+    private String orderId, to;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +93,8 @@ public class OrderDetailActivity extends AppCompatActivity {
                 Order order = value.toObject(Order.class);
 
                 assert order != null;
+                to = order.getUid();
+
                 CheckoutCartItemRecyclerAdapter adapter = new CheckoutCartItemRecyclerAdapter(createOrderItemList(order.getItems()));
                 orderItemRV.setAdapter(adapter);
 
@@ -222,7 +225,18 @@ public class OrderDetailActivity extends AppCompatActivity {
             if (b) orderState = 2;
             Map<String, Object> map = new HashMap<>();
             map.put("orderState", orderState);
-            FirebaseFirestore.getInstance().collection("orders").document(orderId).update(map).addOnFailureListener(e -> Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show());
+            FirebaseFirestore.getInstance().collection("orders").document(orderId).update(map).addOnSuccessListener(unused -> {
+                Auth.Notify.pushNotification(this, to, "Order Dispatched", "Your Order is dispatched.", new Promise<String>() {
+                    @Override
+                    public void resolving(int progress, String msg) {}
+
+                    @Override
+                    public void resolved(String o) {}
+
+                    @Override
+                    public void reject(String err) {}
+                });
+            }).addOnFailureListener(e -> Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show());
         });
 
         confirmDeliveryBtn.setOnClickListener(view -> {
@@ -240,7 +254,20 @@ public class OrderDetailActivity extends AppCompatActivity {
                         Map<String, Object> map = new HashMap<>();
                         map.put("secureNumber", null);
                         map.put("orderState", 4);
-                        reference.update(map).addOnSuccessListener(unused -> Toast.makeText(this, "delivered.", Toast.LENGTH_SHORT).show());
+                        reference.update(map).addOnSuccessListener(unused -> {
+                            Auth.Notify.pushNotification(this, to, "Order Delivered", "Your Order is delivered.", new Promise<String>() {
+                                @Override
+                                public void resolving(int progress, String msg) {}
+
+                                @Override
+                                public void resolved(String o) {
+                                    Toast.makeText(OrderDetailActivity.this, "delivered.", Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void reject(String err) {}
+                            });
+                        });
                     } else {
                         Toast.makeText(this, "Invalid code.", Toast.LENGTH_SHORT).show();
                     }
