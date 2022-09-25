@@ -1,66 +1,91 @@
 package com.rotiking.delivery.tabs;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.material.chip.ChipGroup;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.rotiking.delivery.R;
+import com.rotiking.delivery.adapters.OrderRecyclerAdapter;
+import com.rotiking.delivery.common.auth.Auth;
+import com.rotiking.delivery.models.Order;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link OrdersFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class OrdersFragment extends Fragment {
+    private RecyclerView ordersRV;
+    private LinearLayout noOrdersI;
+    private ChipGroup ordersFilter;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public OrdersFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment OrdersFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static OrdersFragment newInstance(String param1, String param2) {
-        OrdersFragment fragment = new OrdersFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private Query query;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("orderState", 0).whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", true).orderBy("time", Query.Direction.ASCENDING);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_orders, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_orders, container, false);
+
+        ordersRV = view.findViewById(R.id.order_rv);
+        ordersRV.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
+        ordersRV.setHasFixedSize(true);
+
+        noOrdersI = view.findViewById(R.id.no_orders_i);
+        ordersFilter = view.findViewById(R.id.orders_filter);
+
+        return view;
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onStart() {
+        super.onStart();
+        ordersFilter.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            noOrdersI.setVisibility(View.VISIBLE);
+            switch (group.getCheckedChipId()) {
+                case R.id.ordered:
+                    query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("orderState", 1).whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", true).orderBy("time", Query.Direction.ASCENDING);
+                    break;
+
+                case R.id.dispatched:
+                    query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("orderState", 2).whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", true).orderBy("time", Query.Direction.ASCENDING);
+                    break;
+
+                case R.id.delivered:
+                    query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("orderState", 4).whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", true).orderBy("time", Query.Direction.ASCENDING);
+                    break;
+
+                case R.id.canceled:
+                    query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", false).orderBy("time", Query.Direction.ASCENDING);
+                    break;
+            }
+
+            setRecyclerAdapter();
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setRecyclerAdapter();
+    }
+
+    private void setRecyclerAdapter() {
+        FirestoreRecyclerOptions<Order> options = new FirestoreRecyclerOptions.Builder<Order>().setQuery(query, Order.class).build();
+        OrderRecyclerAdapter adapter = new OrderRecyclerAdapter(options, noOrdersI);
+        ordersRV.swapAdapter(adapter, true);
+        adapter.startListening();
     }
 }

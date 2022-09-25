@@ -5,10 +5,12 @@
       <map>
         <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/layout/activity_login.xml" value="0.24947916666666667" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/layout/activity_order_detail.xml" value="0.25" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/layout/activity_recovery_password.xml" value="0.24947916666666667" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/layout/activity_starter.xml" value="0.24947916666666667" />
-        <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/layout/fragment_orders.xml" value="0.1" />
+        <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/layout/fragment_orders.xml" value="0.25" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/layout/fragment_profile.xml" value="0.1" />
+        <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/layout/item_order.xml" value="0.25" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/delivery/app/src/main/res/menu/main_bottom_navigation.xml" value="0.1" />
       </map>
     </option>
