@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -15,8 +16,11 @@ import android.widget.Toast;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rotiking.delivery.adapters.CheckoutCartItemRecyclerAdapter;
+import com.rotiking.delivery.common.auth.Auth;
+import com.rotiking.delivery.common.security.AES128;
 import com.rotiking.delivery.models.CartItem;
 import com.rotiking.delivery.models.CheckoutCartItem;
 import com.rotiking.delivery.models.Order;
@@ -42,7 +46,6 @@ public class OrderDetailActivity extends AppCompatActivity {
     private EditText deliveryCode_eTxt;
 
     private String orderId;
-    private String secureNumber = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,7 +168,6 @@ public class OrderDetailActivity extends AppCompatActivity {
                         onWayState.getBackground().setTint(getColor(R.color.red));
 
                         deliveryCodeDesk.setVisibility(View.VISIBLE);
-                        secureNumber = order.getSecureNumber();
 
                         trackOnMapBtn.setVisibility(View.VISIBLE);
                         trackOnMapBtn.setEnabled(true);
@@ -179,17 +181,22 @@ public class OrderDetailActivity extends AppCompatActivity {
                         onWayState.getBackground().setTint(getColor(R.color.red));
                         deliveredState.getBackground().setTint(getColor(R.color.red));
 
-                        deliveryCodeDesk.setVisibility(View.VISIBLE);
-                        secureNumber = order.getSecureNumber();
+                        dispatchedSwitch.setEnabled(false);
+                        deliveryCodeDesk.setVisibility(View.GONE);
 
-                        trackOnMapBtn.setVisibility(View.VISIBLE);
-                        trackOnMapBtn.setEnabled(true);
+                        trackOnMapBtn.setVisibility(View.GONE);
+                        trackOnMapBtn.setEnabled(false);
 
                         if (order.getSecureNumber() != null) {
                             deliveredState.getBackground().setTint(getColor(R.color.light_red));
 
                             String notDelivered = "Not Delivered Yet";
                             orderedStateTxt.setText(notDelivered);
+
+                            deliveryCodeDesk.setVisibility(View.VISIBLE);
+
+                            trackOnMapBtn.setVisibility(View.VISIBLE);
+                            trackOnMapBtn.setEnabled(true);
                         }
                         break;
                 }
@@ -227,10 +234,18 @@ public class OrderDetailActivity extends AppCompatActivity {
                 return;
             }
 
-            Map<String, Object> map = new HashMap<>();
-            map.put("secureNumber", null);
-            FirebaseFirestore.getInstance().collection("orders").document(orderId).update(map).addOnSuccessListener(unused -> {
-
+            DocumentReference reference = FirebaseFirestore.getInstance().collection("orders").document(orderId);
+            reference.get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    if (AES128.decrypt(Auth.ENCRYPTION_KEY, documentSnapshot.get("secureNumber", String.class)).equals(code)) {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("secureNumber", null);
+                        map.put("orderState", 4);
+                        reference.update(map).addOnSuccessListener(unused -> Toast.makeText(this, "delivered.", Toast.LENGTH_SHORT).show());
+                    } else {
+                        Toast.makeText(this, "Invalid code.", Toast.LENGTH_SHORT).show();
+                    }
+                }
             });
         });
 
