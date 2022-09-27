@@ -63,6 +63,10 @@ public class OrdersFragment extends Fragment {
                     query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("orderState", 2).whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", true).orderBy("time", Query.Direction.ASCENDING);
                     break;
 
+                case R.id.on_way:
+                    query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("orderState", 3).whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", true).orderBy("time", Query.Direction.ASCENDING);
+                    break;
+
                 case R.id.delivered:
                     query = FirebaseFirestore.getInstance().collection("orders").whereEqualTo("orderState", 4).whereEqualTo("agentUid", Auth.getAuthUserUid()).whereEqualTo("orderSuccess", true).orderBy("time", Query.Direction.ASCENDING);
                     break;

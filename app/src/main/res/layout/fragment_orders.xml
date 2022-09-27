@@ -40,6 +40,13 @@
             style="@style/Widget.MaterialComponents.Chip.Filter" />
 
         <com.google.android.material.chip.Chip
+            android:id="@+id/on_way"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/on_way"
+            style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+        <com.google.android.material.chip.Chip
             android:id="@+id/delivered"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

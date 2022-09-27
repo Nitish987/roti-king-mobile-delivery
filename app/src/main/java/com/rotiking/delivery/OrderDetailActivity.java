@@ -174,6 +174,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                         dispatchedState.getBackground().setTint(getColor(R.color.red));
                         onWayState.getBackground().setTint(getColor(R.color.red));
 
+                        dispatchedSwitch.setChecked(true);
                         deliveryCodeDesk.setVisibility(View.VISIBLE);
 
                         trackOnMapBtn.setVisibility(View.VISIBLE);
@@ -233,20 +234,27 @@ public class OrderDetailActivity extends AppCompatActivity {
             FirebaseFirestore.getInstance().collection("orders").document(orderId).update(map).addOnSuccessListener(unused -> {
                 Auth.Notify.pushNotification(this, to, "Order Dispatched", "Your Order is dispatched.", new Promise<String>() {
                     @Override
-                    public void resolving(int progress, String msg) {}
+                    public void resolving(int progress, String msg) {
+                    }
 
                     @Override
-                    public void resolved(String o) {}
+                    public void resolved(String o) {
+                    }
 
                     @Override
-                    public void reject(String err) {}
+                    public void reject(String err) {
+                    }
                 });
             }).addOnFailureListener(e -> Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show());
         });
 
         trackOnMapBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("google.navigation:q=" + geoPoint.getLatitude() + "," + geoPoint.getLongitude()));
-            startActivity(intent);
+            Map<String, Object> map = new HashMap<>();
+            map.put("orderState", 3);
+            FirebaseFirestore.getInstance().collection("orders").document(orderId).update(map).addOnSuccessListener(unused -> {
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("google.navigation:q=" + geoPoint.getLatitude() + "," + geoPoint.getLongitude()));
+                startActivity(intent);
+            }).addOnFailureListener(e -> Toast.makeText(this, "Unable to track.", Toast.LENGTH_SHORT).show());
         });
 
         confirmDeliveryBtn.setOnClickListener(view -> {
@@ -267,7 +275,8 @@ public class OrderDetailActivity extends AppCompatActivity {
                         reference.update(map).addOnSuccessListener(unused -> {
                             Auth.Notify.pushNotification(this, to, "Order Delivered", "Your Order is delivered.", new Promise<String>() {
                                 @Override
-                                public void resolving(int progress, String msg) {}
+                                public void resolving(int progress, String msg) {
+                                }
 
                                 @Override
                                 public void resolved(String o) {
@@ -275,7 +284,8 @@ public class OrderDetailActivity extends AppCompatActivity {
                                 }
 
                                 @Override
-                                public void reject(String err) {}
+                                public void reject(String err) {
+                                }
                             });
                         });
                     } else {
