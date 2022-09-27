@@ -5,6 +5,8 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -17,6 +19,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.rotiking.delivery.adapters.CheckoutCartItemRecyclerAdapter;
 import com.rotiking.delivery.common.auth.Auth;
 import com.rotiking.delivery.common.security.AES128;
@@ -46,6 +49,7 @@ public class OrderDetailActivity extends AppCompatActivity {
     private EditText deliveryCode_eTxt;
 
     private String orderId, to;
+    private GeoPoint geoPoint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +98,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
                 assert order != null;
                 to = order.getUid();
+                geoPoint = order.getLocation();
 
                 CheckoutCartItemRecyclerAdapter adapter = new CheckoutCartItemRecyclerAdapter(createOrderItemList(order.getItems()));
                 orderItemRV.setAdapter(adapter);
@@ -237,6 +242,11 @@ public class OrderDetailActivity extends AppCompatActivity {
                     public void reject(String err) {}
                 });
             }).addOnFailureListener(e -> Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show());
+        });
+
+        trackOnMapBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("google.navigation:q=" + geoPoint.getLatitude() + "," + geoPoint.getLongitude()));
+            startActivity(intent);
         });
 
         confirmDeliveryBtn.setOnClickListener(view -> {
