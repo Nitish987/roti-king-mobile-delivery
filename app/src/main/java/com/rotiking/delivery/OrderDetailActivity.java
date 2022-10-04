@@ -164,7 +164,9 @@ public class OrderDetailActivity extends AppCompatActivity {
                         cookingState.getBackground().setTint(getColor(R.color.red));
                         dispatchedState.getBackground().setTint(getColor(R.color.red));
 
+                        dispatchedSwitch.setOnCheckedChangeListener(null);
                         dispatchedSwitch.setChecked(true);
+                        dispatchedSwitch.setEnabled(false);
                         deliveryCodeDesk.setVisibility(View.VISIBLE);
 
                         trackOnMapBtn.setVisibility(View.VISIBLE);
@@ -178,7 +180,9 @@ public class OrderDetailActivity extends AppCompatActivity {
                         dispatchedState.getBackground().setTint(getColor(R.color.red));
                         onWayState.getBackground().setTint(getColor(R.color.red));
 
+                        dispatchedSwitch.setOnCheckedChangeListener(null);
                         dispatchedSwitch.setChecked(true);
+                        dispatchedSwitch.setEnabled(false);
                         deliveryCodeDesk.setVisibility(View.VISIBLE);
 
                         trackOnMapBtn.setVisibility(View.VISIBLE);
@@ -193,6 +197,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                         onWayState.getBackground().setTint(getColor(R.color.red));
                         deliveredState.getBackground().setTint(getColor(R.color.red));
 
+                        dispatchedSwitch.setOnCheckedChangeListener(null);
                         dispatchedSwitch.setEnabled(false);
                         deliveryCodeDesk.setVisibility(View.GONE);
 
