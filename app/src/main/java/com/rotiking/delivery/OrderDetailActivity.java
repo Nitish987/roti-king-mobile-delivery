@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.rotiking.delivery.adapters.CheckoutCartItemRecyclerAdapter;
 import com.rotiking.delivery.common.auth.Auth;
+import com.rotiking.delivery.common.db.Database;
 import com.rotiking.delivery.common.security.AES128;
 import com.rotiking.delivery.models.CartItem;
 import com.rotiking.delivery.models.CheckoutCartItem;
@@ -243,16 +244,23 @@ public class OrderDetailActivity extends AppCompatActivity {
             FirebaseFirestore.getInstance().collection("orders").document(orderId).update(map).addOnSuccessListener(unused -> {
                 Auth.Notify.pushNotification(this, to, "Order Dispatched", "Your Order is dispatched.", new Promise<String>() {
                     @Override
-                    public void resolving(int progress, String msg) {
-                    }
+                    public void resolving(int progress, String msg) {}
 
                     @Override
-                    public void resolved(String o) {
-                    }
+                    public void resolved(String o) {}
 
                     @Override
-                    public void reject(String err) {
-                    }
+                    public void reject(String err) {}
+                });
+                Database.emailDeliveryOtp(this, orderId, new Promise<String>() {
+                    @Override
+                    public void resolving(int progress, String msg) {}
+
+                    @Override
+                    public void resolved(String o) {}
+
+                    @Override
+                    public void reject(String err) {}
                 });
             }).addOnFailureListener(e -> Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show());
         });

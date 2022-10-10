@@ -58,4 +58,5 @@
     <string name="photo">Photo</string>
     <string name="save">Save</string>
     <string name="on_way">On Way</string>
+    <string name="resent_otp">Resent OTP</string>
 </resources>
