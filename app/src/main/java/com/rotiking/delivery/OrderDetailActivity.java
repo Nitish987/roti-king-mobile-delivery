@@ -1,11 +1,19 @@
 package com.rotiking.delivery;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -38,7 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OrderDetailActivity extends AppCompatActivity {
+public class OrderDetailActivity extends AppCompatActivity implements LocationListener {
     private RecyclerView orderItemRV;
     private ImageButton closeBtn;
     private TextView itemsTxt, orderNumberTxt, totalCartPriceTxt, deliveryCartPriceTxt, totalPayableTxt, nameTxt, phoneTxt, addressTxt, agentNameTxt, agentPhoneTxt, timeTxt, paymentMethodTxt;
@@ -51,6 +59,10 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private String orderId, to;
     private GeoPoint geoPoint;
+    private LocationManager locationManager;
+    private int whatOrderState = -1;
+
+    private static final int LOCATION_PERMISSION_CODE = 102, COARSE_LOCATION_PERMISSION_CODE = 103;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +100,13 @@ public class OrderDetailActivity extends AppCompatActivity {
         orderItemRV = findViewById(R.id.ordered_item_rv);
         orderItemRV.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         orderItemRV.setHasFixedSize(true);
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(OrderDetailActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED) {
+            checkLocationPermission();
+        } else {
+            getCurrentLocation();
+        }
     }
 
     @Override
@@ -100,6 +119,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                 assert order != null;
                 to = order.getUid();
                 geoPoint = order.getLocation();
+                whatOrderState = order.getOrderState();
 
                 CheckoutCartItemRecyclerAdapter adapter = new CheckoutCartItemRecyclerAdapter(createOrderItemList(order.getItems()));
                 orderItemRV.setAdapter(adapter);
@@ -289,6 +309,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                         Map<String, Object> map = new HashMap<>();
                         map.put("secureNumber", null);
                         map.put("orderState", 4);
+                        map.put("agentLocation", new GeoPoint(0,0));
                         reference.update(map).addOnSuccessListener(unused -> {
                             Auth.Notify.pushNotification(this, to, "Order Delivered", "Your Order is delivered.", new Promise<String>() {
                                 @Override
@@ -348,5 +369,48 @@ public class OrderDetailActivity extends AppCompatActivity {
             default:
                 return "";
         }
+    }
+
+    private void checkLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(OrderDetailActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED)
+            ActivityCompat.requestPermissions(OrderDetailActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
+        else if (ActivityCompat.checkSelfPermission(OrderDetailActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED)
+            ActivityCompat.requestPermissions(OrderDetailActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, COARSE_LOCATION_PERMISSION_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_CODE || requestCode == COARSE_LOCATION_PERMISSION_CODE) {
+            getCurrentLocation();
+        }
+    }
+
+    private void getCurrentLocation() {
+        if (whatOrderState != 4) {
+            if (ActivityCompat.checkSelfPermission(OrderDetailActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(OrderDetailActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
+                else
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
+            } else {
+                Toast.makeText(OrderDetailActivity.this, "Location is required for delivery purpose.", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        Map<String, Object> map = new HashMap<>();
+        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+        map.put("agentLocation", geoPoint);
+        FirebaseFirestore.getInstance().collection("orders").document(orderId).update(map);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        locationManager.removeUpdates(this);
     }
 }

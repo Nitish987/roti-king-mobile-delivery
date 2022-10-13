@@ -102,7 +102,10 @@ public class LoginActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             } else {
-                                Toast.makeText(LoginActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
+                                loginBtn.setVisibility(View.VISIBLE);
+                                loginProgress.setVisibility(View.INVISIBLE);
+
+                                Toast.makeText(LoginActivity.this, "no Account Exists.", Toast.LENGTH_SHORT).show();
                             }
                         });
             }).addOnFailureListener(e -> {

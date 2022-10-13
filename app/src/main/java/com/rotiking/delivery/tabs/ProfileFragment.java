@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.rotiking.delivery.LoginActivity;
 import com.rotiking.delivery.MyPhotoActivity;
 import com.rotiking.delivery.R;
 import com.rotiking.delivery.common.auth.Auth;
@@ -82,6 +83,11 @@ public class ProfileFragment extends Fragment {
                 AuthPreferences preferences = new AuthPreferences(view.getContext());
                 preferences.clear();
                 FirebaseAuth.getInstance().signOut();
+
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                getActivity().finish();
             });
             alert.setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss());
             alert.show();
