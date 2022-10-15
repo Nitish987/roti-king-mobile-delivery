@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -26,7 +27,7 @@ import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
     private AppCompatButton loginBtn;
-    private TextView forgetPasswordTxt;
+    private TextView forgetPasswordTxt, termsPrivacy;
     private EditText email_eTxt, password_eTxt;
     private CircularProgressIndicator loginProgress;
 
@@ -40,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
         loginBtn = findViewById(R.id.login_btn);
         loginProgress = findViewById(R.id.login_progress);
         forgetPasswordTxt = findViewById(R.id.forget_password);
+        termsPrivacy = findViewById(R.id.terms_privacy);
     }
 
     @Override
@@ -118,6 +120,12 @@ public class LoginActivity extends AppCompatActivity {
         forgetPasswordTxt.setOnClickListener(view -> {
             Intent intent = new Intent(this, RecoverPasswordActivity.class);
             startActivity(intent);
+        });
+
+        termsPrivacy.setOnClickListener(view -> {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse("https://rotiking.co.in/privacy/"));
+            startActivity(i);
         });
     }
 
